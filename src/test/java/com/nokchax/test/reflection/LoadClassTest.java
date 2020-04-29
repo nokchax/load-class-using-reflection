@@ -1,5 +1,6 @@
 package com.nokchax.test.reflection;
 
+import com.nokchax.test.reflection.loader.CustomClassLoader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
@@ -58,6 +59,17 @@ class LoadClassTest {
                 .collect(Collectors.toList());
 
         annotationAttachedClasses.forEach(System.out::println);
-        assertThat(annotationAttachedClasses).containsAll(ANNOTATION_ATTACHED_CLASSES);
+        assertThat(annotationAttachedClasses).containsAll(ANNOTATION_ATTACHED_CLASSES)
+                .doesNotContainSequence(NORMAL_CLASSES);
+    }
+
+    @Test
+    @DisplayName("패키지명으로 클래스 로드하기")
+    void loadClassUsingPackagePath() {
+        Class<?> loadedClass = CustomClassLoader.loadClass(DOT_ATTACHED_PACKAGE + "Load");
+
+        System.out.println(loadedClass);
+        assertThat(loadedClass).isNotNull();
+        assertThat(loadedClass.getName()).endsWith("Load");
     }
 }
