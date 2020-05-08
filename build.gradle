@@ -2,6 +2,7 @@ plugins {
     id 'java'
 }
 
+
 group 'com.nokchax.test.reflection.load-class'
 version '1.0-SNAPSHOT'
 
@@ -18,4 +19,17 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.nokchax.test.reflection.Main'
+    }
+
+    // https://stackoverflow.com/questions/19150811/what-is-a-fat-jar
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
 }

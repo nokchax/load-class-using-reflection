@@ -28,7 +28,7 @@ public class CustomClassLoader {
         return null;
     }
 
-    private static String resourceName(String name) {
+    public static String resourceName(String name) {
         if(name == null || name.isEmpty()) {
             return null;
         }
@@ -43,9 +43,10 @@ public class CustomClassLoader {
         final List<URL> result = new ArrayList<>();
 
         try {
-            final Enumeration<URL> urls = classLoader.getResources(resourceName);
+            final Enumeration<URL> urls = ClassLoader.getSystemClassLoader().getResources(resourceName);
             while (urls.hasMoreElements()) {
                 final URL url = urls.nextElement();
+                System.out.println(url.toExternalForm());
                 int index = url.toExternalForm().lastIndexOf(resourceName);
                 if (index != -1) {
                     // Add old url as contextUrl to support exotic url handlers

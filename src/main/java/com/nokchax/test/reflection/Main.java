@@ -1,10 +1,7 @@
 package com.nokchax.test.reflection;
 
-import com.nokchax.test.reflection.loader.CustomClassLoader;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.sun.javafx.runtime.SystemProperties;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,45 +10,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-class LoadClassTest {
+public class Main {
     private static final String PACKAGE = "com.nokchax.test.reflection";
     private static final String DOT_ATTACHED_PACKAGE = PACKAGE + ".";
     private static final List<String> ANNOTATION_ATTACHED_CLASSES = attachPackage(Collections.singletonList("LoadAttachedClass"));
     private static final List<String> NORMAL_CLASSES = attachPackage(Arrays.asList("Load", "NormalClass", "LoadClassTest"));
     private static final List<String> ALL_CLASSES = Stream.concat(
-                    ANNOTATION_ATTACHED_CLASSES.stream(),
-                    NORMAL_CLASSES.stream()
-            )
+            ANNOTATION_ATTACHED_CLASSES.stream(),
+            NORMAL_CLASSES.stream()
+    )
             .collect(Collectors.toList());
 
-    private static List<String> attachPackage(List<String> classNames) {
-        return classNames.stream()
-                .map(className -> DOT_ATTACHED_PACKAGE + className)
-                .collect(Collectors.toList());
-    }
+    public static void main(String[] args) throws Exception {
+        System.out.println("start");
+        List<Class<?>> classes = getClasses("com.nokchax.test.reflection");
 
-    @Test
-    @DisplayName("리플렉션 라이브러리로 로드 테스트")
-    void loadClassUsingReflectionLibrary() {
-        Reflections reflections = new Reflections(
-                PACKAGE,
-                new SubTypesScanner(false)
-        );
+        classes.forEach(System.out::println);
+        System.out.println("end : " + classes.size());
 
-        List<String> classNames = reflections.getSubTypesOf(Object.class)
-                .stream()
-                .map(Class::getName)
-                .collect(Collectors.toList());
-
-        classNames.forEach(System.out::println);
-        assertThat(classNames).containsAll(ALL_CLASSES);
-    }
-
-    @Test
-    @DisplayName("어노테이션이 붙어있는 클래스만 로드하기")
-    void LoadAnnotationAttachedClassUsingReflectionLibrary() {
+        System.out.println();
+        System.out.println("start using library");
         Reflections reflections = new Reflections(PACKAGE);
 
         List<String> annotationAttachedClasses = reflections.getTypesAnnotatedWith(Load.class)
@@ -60,27 +38,14 @@ class LoadClassTest {
                 .collect(Collectors.toList());
 
         annotationAttachedClasses.forEach(System.out::println);
-        assertThat(annotationAttachedClasses).containsAll(ANNOTATION_ATTACHED_CLASSES)
-                .doesNotContainSequence(NORMAL_CLASSES);
+        System.out.println("end : " + annotationAttachedClasses.size());
+
+        System.out.println();
+        System.out.println("start using library");
+        Collection<Class<?>> classes1 = PackageUtil.getClasses(PACKAGE);
+        classes1.forEach(System.out::println);
+        System.out.println("end : " + classes1.size());
     }
-
-    @Test
-    @DisplayName("resourceName 테스트")
-    void resourceNameTest() {
-        String resourceName = CustomClassLoader.resourceName(DOT_ATTACHED_PACKAGE + "Load");
-
-        System.out.println("Before : " + DOT_ATTACHED_PACKAGE + "Load");
-        System.out.println("After : " + resourceName);
-    }
-
-    @Test
-    @DisplayName("for resource 테스트")
-    void forResourceTest() throws IOException, ClassNotFoundException {
-        List<Class<?>> classes = getClasses("com.nokchax.test.reflection");
-
-        classes.forEach(System.out::println);
-    }
-
 
     private static List<Class<?>> getClasses(String packageName)
             throws ClassNotFoundException, IOException {
@@ -124,5 +89,11 @@ class LoadClassTest {
             }
         }
         return classes;
+    }
+
+    private static List<String> attachPackage(List<String> classNames) {
+        return classNames.stream()
+                .map(className -> DOT_ATTACHED_PACKAGE + className)
+                .collect(Collectors.toList());
     }
 }
